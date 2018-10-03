@@ -1,0 +1,39 @@
+---
+
+- name: Reset kubeadm before init in case this is not the first run
+  command: kubeadm reset -f
+  when: kubeadm_reset_before_init
+
+- name: kubeadm init with pre generated token
+  command: kubeadm init --token {{ kubeadm_token }}
+
+- pause:
+    minutes: 3
+    prompt: "Make sure admin pods are started"
+
+- name: allow permissive RBAC rules
+  command: "kubectl --kubeconfig /etc/kubernetes/admin.conf create clusterrolebinding permissive-binding \
+  --clusterrole=cluster-admin \
+  --user=admin \
+  --user=kubelet \
+  --group=system:serviceaccounts"
+
+- name: taint master node
+  command: kubectl --kubeconfig /etc/kubernetes/admin.conf taint nodes --all node-role.kubernetes.io/master-
+
+- name: copy config file to HOME/.kube dir
+  command: "{{ item }}"
+  with_items:
+    - mkdir -p ~{{ansible_remote_user }}/.kube
+    - cp /etc/kubernetes/admin.conf ~{{ansible_remote_user }}/.kube/config
+    - chown -R {{ ansible_remote_user }}:{{ ansible_remote_user }} ~{{ansible_remote_user }}/.kube
+    - chmod 0400 ~{{ansible_remote_user }}/.kube/config
+
+- name: download Weave Net yaml file
+  script: ../../../scripts/weavenet.sh
+- name: install Weave Net pod network
+  command: "kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f /tmp/weavenet.yml"
+
+- pause:
+    minutes: 3
+    prompt: "Make sure network pods are started"

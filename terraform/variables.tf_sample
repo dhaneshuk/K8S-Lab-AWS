@@ -1,0 +1,19 @@
+# Update the document and rename as variables.tf
+
+# AWS Config
+
+variable "aws_access_key" {
+  default = "Your key"
+}
+
+variable "aws_secret_key" {
+  default = "Your Secret Key"
+}
+
+variable "aws_region" {
+  default = "Region"
+}
+
+data "external" "myipaddr" {
+  program = ["bash", "-c", "curl -s 'https://api.ipify.org?format=json'"]
+}

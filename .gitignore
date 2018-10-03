@@ -1,0 +1,12 @@
+# Compiled files
+terraform/*.tfstate
+terraform/*.tfstate.backup
+
+# Module directory
+terraform/.terraform/
+
+# Sensitive Files
+terraform/variables.tf
+
+#ansible retry file
+ansible/site.retry
