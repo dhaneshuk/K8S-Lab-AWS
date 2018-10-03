@@ -10,3 +10,6 @@ terraform/variables.tf
 
 #ansible retry file
 ansible/site.retry
+
+#ansible inventory file
+ansible/inventory
